@@ -1,0 +1,92 @@
+{% load static %}
+{% load tags %}
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+<div>
+    {% if settings.enableSortTable %}
+        <table id="myTable" class="sortable-table table">
+    {% else %}
+        <table id="myTable" class="table">
+    {% endif %}
+    <thead>
+    <tr>
+        {% for j in range_days %}
+            {% if forloop.first %}
+                <th>
+                    <p class="headParagraph changeParagraph main">
+                        {{ month_name }} {{ year }}
+                    </p>
+                </th>
+            {% else %}
+                <th>
+                    <p class="headParagraph {% if weekends|index:j %} weekend {% else %} changeParagraph {% endif %} minor">
+                        {{ j|add:1 }}
+                    </p>
+                </th>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for activity in range_activities %}
+        <tr style="{% if not activity.isGroup and activity|group_is_open:group_open and settings.enableOpenCloseGroups or settings.vanishing != 'off' and activity.todayCheck == 'True' %} display: none; {% endif %}"
+            class="{% if activity.isGroup %}isGroup{{ activity.pk }}{% else %}group{{ activity|get_group_id:connections }}-{{ activity.pk }}{% endif %}">
+            {% for j in range_days %}
+                {% if forloop.first %}
+                    <td class="header {% if activity.isOpen %} expand {% endif %} {% if activity.isGroup %} isGroup{{ activity.pk }} {% else %} group{{ activity|get_group_id:connections }}-{{ activity.pk }} {% endif %}">
+                        <p class="paragraph" id="p{{ forloop.parentloop.counter0 }}{% if mobile_version and j != -1 %}-{% endif %}{{ j }}" data-pk="{{ activity.pk }}"
+                           style="{% if not activity|get_group_id:connections == None %} margin-left: 10px; {% endif %}{% if mobile_version %}font-size: 12px;{% endif %}" data-conn="{{ activity|connection_group:lst_group_conns }}" data-type="{% if activity.isGroup %}группы{% else %}активности{% endif %}" data-name="{{ activity.name }}">
+                            {% if settings.showDeleteActivity %}
+                                <a class="deleteActivityButt">
+                                    <button class="deleteActivity" type="button">
+                                        <img class="cross" data-pk="{{ activity.pk }}" src="{% static 'cross.png' %}">
+                                    </button>
+                                </a>
+
+                            {% endif %}
+                            {{ activity.name }}
+                        </p>
+                    </td>
+                {% else %}
+                    <td>
+                        {% if activity.isGroup %}
+                            {% progress_cell as progress_result %}
+                            {% if not progress_result == -1 %}
+                                <div class="progress vertical {% if today|add:-1 == j %}today{% endif %} {% if progress_result > 0 and progress_result < 100 %} notFull {% elif progress_result == 100 %} full {% else %} off {% endif %}">
+                                    <div class="progress-bar {% if progress_result > 0 and progress_result < 100 %} notFull {% elif progress_result == 100 %} full {% else %} off {% endif %}"
+                                         style="width: {{ progress_result|floatformat:0 }}%;height: 24px;background-color: {{ activity.backgroundColor }}" data-bgcolor="{{ activity.backgroundColor }}">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            {% if activity.beginDay <= j and j <= activity.endDay and activity|get_one_day:j %}
+                                <div id="{{ forloop.parentloop.counter0 }}-{{ j }}" {% get_comments as res %} data-title="{{ res }}"
+                                     class="divClick {% if today|add:-1 == j %}today{% endif %} {% if res %}hasText{% endif %} {% get_class_on as checked %}{% if checked %}on{% endif %} {% if j > 15 %}bigger15{% endif %}">{% get_symbols %}</div>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+{#    <tfoot>#}
+{#    <tr>#}
+{#        {% for day_count in range_days %}#}
+{#            {% if forloop.first %}#}
+{#                <td></td>#}
+{#            {% else %}#}
+{#                <td><div id="number{{ forloop.counter0|add:-1 }}" class="number">0</div></td>#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{#    </tfoot>#}
+    </table>
+</div>  <!-- Таблица активностей -->
+
+<button id="deleteAll" class="button-6" role="button" style="background-color:#ffdfdf;width: auto; display:{% if range_activities and settings.showDeleteAllActivities %}block;{% else %}none;{% endif %}">Очистить все активности</button>
+<!-- Кнопка удаления всех активностей -->
+<button id="openAll" class="button-6" role="button" style="background-color:#dffffa;width: auto; display:{% if range_activities and settings.showOpenAllGroups %}block;{% else %}none;{% endif %}">Раскрыть/свернуть группы</button>
+<!-- Кнопка развёртывания всех групп -->
+
+{#<button class="button-6" id="buttonUp" role="button" style="background-color:#dfefff;width: auto">Вверх</button>#}

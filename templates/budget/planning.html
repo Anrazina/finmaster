@@ -1,0 +1,89 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>История финансов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'budget/css/history_finance.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+{% include 'budget/mic.html' %}
+<div class="row" style="justify-content: center; display:flex;">
+    <!-- Доходы -->
+    <div class="col-sm-12 col-md-6 col-lg-3">
+        <h2>Доходы</h2>
+        {% for transaction in incomes %}
+            <div class="transaction-card col-sm-12 col-md-6 col-lg-3" style="background-color: #ebffe0">
+                <div class="details">
+                    <div class="category"
+                         style="background-color: {{ transaction.category.color }}">{{ transaction.category }}</div>
+                    {% if not 'permanent' in request.path %}
+                        <div class="date category">{{ transaction.date }}</div>{% endif %}
+                </div>
+                <div class="line"></div>
+                <div class="details">
+                    <span class="amount"><span class="currency-symbol">₽</span> {{ transaction.amount }}</span>
+                    <span class="description">{{ transaction.description }}</span>
+                </div>
+                <div class="details" style="margin-top: 8px;">
+                    <span class="description">{{ transaction.frequency|translate_frequency }}</span>
+                    <span class="description"
+                          style="float: right">{{ transaction.notification_frequency|translate_frequency }}</span>
+                </div>
+                <div class="actions">
+                    <i class="fa fa-{{ transaction.category.icon }}" style="float: left"></i>
+                    <a href="{% url 'budget:transaction-edit' transaction.id %}" class="card-link"><i
+                            style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-pen-to-square"></i></a>
+                    <a href="{% url 'budget:transaction-delete' transaction.id %}" class="card-link"><i
+                            style="color: #ff8a8a" class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+        {% empty %}
+            <p>Доходных транзакций не найдено.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Расходы -->
+    <div>
+        <h2>Расходы</h2>
+        {% for transaction in expenses %}
+            <div class="transaction-card col-sm-12 col-md-6 col-lg-3" style="background-color: #ffe9e9">
+                <div class="details">
+                    <div class="category"
+                         style="background-color: {{ transaction.category.color }}">{{ transaction.category }}</div>
+                    {% if not 'permanent' in request.path %}
+                        <div class="date category">{{ transaction.date }}</div>{% endif %}
+                </div>
+                <div class="line"></div>
+                <div class="details">
+                    <span class="amount"><span class="currency-symbol">₽</span> {{ transaction.amount }}</span>
+                    <span class="description">{{ transaction.description }}</span>
+                </div>
+                <div class="details" style="margin-top: 8px;">
+                    <span class="description">{{ transaction.frequency|translate_frequency }}</span>
+                    <span class="description"
+                          style="float: right">{{ transaction.notification_frequency|translate_frequency }}</span>
+                </div>
+                <div class="actions">
+                    <i class="fa fa-{{ transaction.category.icon }}" style="float: left"></i>
+                    <a href="{% url 'budget:transaction-edit' transaction.id %}" class="card-link"><i
+                            style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-pen-to-square"></i></a>
+                    <a href="{% url 'budget:transaction-delete' transaction.id %}" class="card-link"><i
+                            style="color: #ff8a8a" class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+        {% empty %}
+            <p>Расходных транзакций не найдено.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/03c2a52bd5.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment-with-locales.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогнозирование</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link rel="stylesheet" href="{% static 'budget/css/prediction.css' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+
+        .container {
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .btn-custom {
+            font-size: 1em;
+        }
+    }
+    </style>
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+{% include 'budget/mic.html' %}
+
+<div class="content-container">
+    <div class="centered-div">
+        <h1>Форма прогнозирования</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.forecast_type.label_tag }}
+                {{ form.forecast_type }}
+            </div>
+            <div class="form-group">
+                {{ form.quantity.label_tag }}
+                {{ form.quantity }}
+            </div>
+            <button type="submit" class="btn btn-custom">Отправить</button>
+        </form>
+        <h1>Прогнозирование</h1>
+        <canvas id="expenseChart"></canvas>
+        <canvas id="incomeChart"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctxExpense = document.getElementById('expenseChart').getContext('2d');
+        var ctxIncome = document.getElementById('incomeChart').getContext('2d');
+
+        var expensesData = JSON.parse('{{ expenses_json|escapejs }}');
+        var incomesData = JSON.parse('{{ incomes_json|escapejs }}');
+        var forecastedExpenses = JSON.parse('{{ forecasted_expenses|escapejs }}');
+        var forecastedIncomes = JSON.parse('{{ forecasted_incomes|escapejs }}');
+
+        let expenseDates
+        {% if forecast_type == 'days' %}
+            expenseDates = generateFutureDates();
+        {% else %}
+            expenseDates = getFutureMonths();
+        {% endif %}
+        console.log(expenseDates)
+        var expenseAmounts = expensesData.map(expense => expense.amount);
+        var incomeDates = incomesData.map(income => income.date);
+        var incomeAmounts = incomesData.map(income => income.amount);
+
+        var expenseChart = new Chart(ctxExpense, {
+            type: 'line',
+            data: {
+                labels: expenseDates,
+                datasets: [{
+                    label: 'Прогнозируемые траты',
+                    data: forecastedExpenses,
+                    borderColor: 'rgb(201,50,50)',
+                    backgroundColor: 'rgba(235,54,54,0.2)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                {% if forecast_type == 'days' %}
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    }
+                }
+        {% endif %}
+            }
+        });
+
+        var incomeChart = new Chart(ctxIncome, {
+            type: 'line',
+            data: {
+                labels: expenseDates,
+                datasets: [{
+                    label: 'Прогнозируемые доходы',
+                    data: forecastedIncomes,
+                    borderColor: 'rgb(83,211,41)',
+                    backgroundColor: 'rgba(145,255,102,0.2)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                {% if forecast_type == 'days' %}
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    }
+                }
+        {% endif %}
+            }
+        });
+    });
+
+    function generateFutureDates() {
+        const futureDates = [];
+        const today = new Date();
+        for (let i = 1; i <= {{ quantity }}; i++) {
+
+            const futureDate = new Date();
+            futureDate.setDate(today.getDate() + i);
+
+            const formattedDate = futureDate.toISOString().split('T')[0];
+            futureDates.push(formattedDate);
+        }
+        return futureDates;
+    }
+
+    function getFutureMonths() {
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        const futureMonths = [];
+        const currentDate = new Date();
+        let currentMonth = currentDate.getMonth() + 1;
+
+        for (let i = 0; i < {{ quantity }}; i++) {
+            futureMonths.push(monthNames[currentMonth]);
+            currentMonth = (currentMonth + 1) % 12;
+        }
+
+        return futureMonths;
+    }
+
+</script>
+</body>
+</html>

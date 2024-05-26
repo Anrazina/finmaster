@@ -1,0 +1,298 @@
+{% extends 'todos/base.html' %}
+{% load static %}
+
+{% block title %}<title>TODO</title>{% endblock %}
+
+{% block content %}
+    <div class="container">
+
+        <!-- title row -->
+        <div class="row">
+            <div class="offset-md-2 col-lg-9">
+                <div class="page-header">
+                    <h2>
+                        Задачи
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add a todo row -->
+        <div class="row">
+            <div class="offset-md-2 col-lg-9">
+                <form method="post" action="{% url 'todos:add' %}" id="addTodoForm">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <input type="text" id="newTodoTitle" class="form-control" name="title"
+                                   placeholder="Название" required>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" name="submit" class="btn btn-outline-primary">
+                                Добавить
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <hr/>
+
+        <!-- Navbar for filtering todos — оберните его в row и col, соответствующий другим элементам страницы -->
+        <div class="row">
+            <div class="offset-md-2 col-lg-9">
+                <div class="navbar">
+                    <button id="pending" class="active">Невыполненные</button>
+                    <button id="all" class="">Все задачи</button>
+                    <button id="completed" class="">Выполненные</button>
+                    <button id="archive" class="">Архив</button>
+                </div>
+            </div>
+        </div>
+
+        <hr/>
+
+        <!-- todo list row -->
+        <div class="row">
+            <div class="offset-md-2 col-lg-6">
+                <div class="list-group" id="activeTodoList">
+                </div>
+
+                <div class="list-group disabled" id="hiddenTodoList">
+
+                    {% for todo in todo_all %}
+                        <div class="list-group-item {% if todo.isCompleted %} todo-complete {% endif %}"
+                             data-created-at="{{ todo.created_at.isoformat }}"
+                             data-status="{% if todo.hide %}archive{% elif todo.isCompleted %}completed{% else %}pending{% endif %}">
+                            <input type="checkbox" onchange="updateTaskStatus(this, {{ todo.id }})"
+                                    {% if todo.isCompleted %} checked {% endif %} class="todo-status-checkbox">
+                            {{ todo.title }}
+                            <a onclick="archiveTask(event, {{ todo.id }})" title="Архивировать" id="addToArchive">
+{#                                <i class="fa fa-trash"></i>#}
+                                <i class='fa fa-inbox'></i>
+                            </a>
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extrajs %}
+    <script>
+        const filterButtons = document.querySelectorAll('.navbar button');
+        const activeList = document.getElementById('activeTodoList');
+        const hiddenList = document.getElementById('hiddenTodoList');
+        const addForm = document.getElementById('addTodoForm');
+        const newTodoTitle = document.getElementById('newTodoTitle');
+        const todoList = document.getElementById('activeTodoList');
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            function filterTasks(status) {
+                // Перемещаем все задачи в скрытый список
+                while (activeList.firstChild) {
+                    hiddenList.appendChild(activeList.firstChild);
+                }
+
+                // А теперь перемещаем обратно те, которые соответствуют статусу
+                Array.from(hiddenList.children).forEach(task => {
+                    const taskStatus = task.getAttribute('data-status');
+                    const buttonArchive = task.querySelector('#addToArchive');
+
+                    if (taskStatus === 'archive') {
+                        buttonArchive.style.display = 'none';
+                    }
+
+                    if ((status === 'all' && taskStatus !== 'archive') || taskStatus === status) {
+                        activeList.appendChild(task);
+                    }
+                });
+            }
+
+            // Функция для обработки клика по кнопке фильтра
+            function handleFilterClick(event) {
+                // Удаляем активный класс у всех кнопок
+                filterButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                // Добавляем активный класс текущей нажатой кнопке
+                const button = event.target;
+                button.classList.add('active');
+
+                // Получаем статус, который мы хотим отфильтровать
+                const status = button.id; // id кнопки совпадает со статусом (например, "archive", "completed", "pending")
+
+                // Вызываем функцию фильтрации задач
+                filterTasks(status);
+            }
+
+            // Добавляем обработчик событий ко всем кнопкам фильтрации
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', handleFilterClick);
+            });
+
+            // По умолчанию показываем все задачи (или можно установить другой фильтр)
+            filterTasks('pending');
+
+            addForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Сначала получаем значение из поля ввода
+                const title = newTodoTitle.value.trim();
+                if (title === "") {
+                    alert("Введите название задачи.");
+                    return;
+                }
+
+                // Отправляем данные на сервер используя AJAX
+                fetch('{% url "todos:add" %}', { // Замените на URL вашего API для добавления задачи
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Пример получения CSRF токена из cookie
+                    },
+                    body: JSON.stringify({title: title})
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Добавляем задачу в список, если API вернул успех
+                            const taskHtml = `
+            <div class="list-group-item" data-created-at="${data.created_at}" data-status="pending">
+              <input type="checkbox" onchange="updateTaskStatus(this, ${data.id})" class="todo-status-checkbox">
+              ${title}
+                            <a onclick="archiveTask(event, ${data.id})" title="Архивировать" id="addToArchive">
+                                <i class='fa fa-inbox'></i>
+                            </a>
+            </div>
+          `;
+                            // Вставляем новый элемент в DOM
+                            todoList.insertAdjacentHTML('afterBegin', taskHtml);
+
+                            // Очищаем поле ввода после добавления задачи
+                            newTodoTitle.value = '';
+                        } else {
+                            // Обработка ошибок
+                            alert("Произошла ошибка при добавлении задачи: " + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+
+        });
+
+        function updateTaskStatus(checkbox, taskId) {
+            const isChecked = checkbox.checked;
+            const listItem = checkbox.closest('.list-group-item');
+            const updateUrl = '/todos/' + taskId.toString() + '/update';
+
+            fetch(updateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    'isCompleted': isChecked
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (isChecked) {
+                        listItem.classList.add('todo-complete');
+                        listItem.setAttribute('data-status', 'completed');
+                        hiddenList.appendChild(listItem);
+                        sortTasks(hiddenList);
+                    } else {
+                        listItem.classList.remove('todo-complete');
+                        listItem.setAttribute('data-status', 'pending');
+                        hiddenList.appendChild(listItem);
+                        sortTasks(hiddenList);
+                    }
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        }
+
+        function archiveTask(event, taskId) {
+            event.preventDefault(); // Предотвращаем действия по умолчанию
+            const listItem = event.target.closest('.list-group-item');
+            const archiveUrl = '/todos/' + taskId.toString() + '/delete'; // URL на ваш API для архивации задачи
+
+            fetch(archiveUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') // Убедитесь в наличии CSRF токена
+                },
+                body: JSON.stringify({
+                    'status': 'archive'
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Задача успешно архивирована на сервере
+                        listItem.setAttribute('data-status', 'archive'); // Меняем data-status на 'archive'
+                        hiddenList.appendChild(listItem); // Перемещаем задачу в архивный список
+                    } else {
+                        // На случай ошибки, можно выводить сообщение или действовать иначе
+                        console.error("Ошибка при архивации задачи.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка при выполнении запроса на архивацию:", error);
+                });
+        }
+
+        function sortTasks(container) {
+            let tasks = Array.from(container.getElementsByClassName('list-group-item'));
+            // Измененная сортировка, чтобы более новые даты шли первыми
+            tasks.sort(function (a, b) {
+                let dateA = new Date(a.getAttribute('data-created-at'));
+                let dateB = new Date(b.getAttribute('data-created-at'));
+                return dateB - dateA; // От большей даты к меньшей
+            });
+
+            // Переупорядочиваем элементы в контейнере
+            for (let i = 0; i < tasks.length; i++) {
+                container.appendChild(tasks[i]);
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+{% endblock %}

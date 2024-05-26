@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Детали Счета</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'budget/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/account_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="bank-card">
+                <div class="card-body">
+                    <h3 class="card-title">{{ account.account_type.name }} - {{ account.name }}</h3>
+                    {% if account.account_type.pk == 2 %}
+                        <p class="bank-card-detail">Валюта:<span>{{ account.currency.name }}</span></p>
+                        <p class="bank-card-detail">Баланс:<span>{{ account.balance }}</span></p>
+                        <p class="bank-card-detail">Дата открытия:<span>{{ account.opening_date }}</span></p>
+                        <p class="bank-card-detail">Дата закрытия:<span>{{ account.closing_date }}</span></p>
+                        <p class="bank-card-detail">Начальный баланс:<span>{{ account.initial_balance }}</span></p>
+                        <p class="bank-card-detail">Процентная ставка:<span>{{ account.interest_rate }}</span></p>
+                        <p class="bank-card-detail">Кредитный лимит:<span>{{ account.credit_limit }}</span></p>
+                    {% else %}
+                        <p class="bank-card-detail">Валюта:<span>{{ account.currency.name }}</span></p>
+                        <div style="display:flex;justify-content: space-between">
+                            <p class="bank-card-detail">
+                                Накоплено:<span>{{ account.initial_balance }}/{{ account.balance }}</span></p>
+                            <div class="progress-bar">
+                                <span id="progress"></span>
+                            </div>
+                        </div>
+                        <p class="bank-card-detail">Дедлайн:<span>{{ account.closing_date }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if account.account_type.pk == 1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let initialBalance = parseFloat('{{ account.initial_balance|stringformat:"f" }}');
+        let balance = parseFloat('{{ account.balance|stringformat:"f" }}');
+        let progress = (initialBalance / balance) * 100;
+
+        document.getElementById('progress').style.width = progress + '%';
+    });
+</script>
+{% endif %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{% static 'budget/03c2a52bd5.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/dropdown.css' %}">
+
+<dialog class="dialog" id="some-modal-id">
+    <h3 class="dialog__title">Настройки</h3>
+    <hr>
+    <p></p>
+    <form id="settingsGlobal" action="{% url 'by_date' date %}" method="post">
+        {% csrf_token %}
+        <div>
+            <label for="selectSettings">Настройка</label>
+            <button type="button" id="addSetting" class="button-6" style="width: auto;height: auto;background-color:#dfffdf;">add</button>
+            <input type="text" id="nameSetting" name="nameSetting" value="{{ settings.name }}">
+        <button type="button" id="delSetting" class="button-6" style="width: auto;height: auto;background-color:#ffdfdf;">del</button>
+            <select id="selectSettings" name="selectSettings" style="margin-left: 10px;">
+                {% for setting in all_settings %}
+                    <option {% if setting.selected %}selected{% endif %} value="{{ setting.pk }}">{{ setting.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+        <label for="selectFont">Шрифт</label>
+        <select id="selectFont" name="selectFont" style="margin-left: 10px;">
+            <option {% if settings.fontFamily == 'Consolas' %}selected{% endif %} style="font-family: 'Consolas', serif" name="Consolas">Consolas</option>
+            <option {% if settings.fontFamily == 'Montserrat' %}selected{% endif %} style="font-family: 'Montserrat', serif" name="Montserrat">Montserrat</option>
+            <option {% if settings.fontFamily == 'Montserrat Alternates' %}selected{% endif %} style="font-family: 'Montserrat Alternates', serif" name="Montserrat Alternates">Montserrat Alternates</option>
+            <option {% if settings.fontFamily == 'Georgia' %}selected{% endif %} style="font-family: 'Georgia', serif" name="Georgia">Georgia</option>
+            <option {% if settings.fontFamily == 'JetBrains Mono' %}selected{% endif %} style="font-family: 'JetBrains Mono', serif" name="JetBrains Mono">JetBrains Mono</option>
+            <option {% if settings.fontFamily == 'Arial' %}selected{% endif %} style="font-family: 'Arial', serif" name="Arial">Arial</option>
+            <option {% if settings.fontFamily == 'Courier New' %}selected{% endif %} style="font-family: 'Courier New', serif" name="Courier New">Courier New</option>
+            <option {% if settings.fontFamily == 'Lucida Console' %}selected{% endif %} style="font-family: 'Lucida Console', serif" name="Lucida Console">Lucida Console</option>
+            <option {% if settings.fontFamily == 'Trebuchet MS' %}selected{% endif %} style="font-family: 'Trebuchet MS', serif" name="Trebuchet MS">Trebuchet MS</option>
+            <option {% if settings.fontFamily == 'Istok Web' %}selected{% endif %} style="font-family: 'Istok Web', serif" name="Istok Web">Istok Web</option>
+            <option {% if settings.fontFamily == 'Roboto Mono' %}selected{% endif %} style="font-family: 'Roboto Mono', serif" name="Roboto Mono">Roboto Mono</option>
+            <option {% if settings.fontFamily == 'Inter' %}selected{% endif %} style="font-family: 'Inter', serif" name="Inter">Inter</option>
+            <option {% if settings.fontFamily == 'Ubuntu' %}selected{% endif %} style="font-family: 'Ubuntu', serif" name="Ubuntu">Ubuntu</option>
+            <option {% if settings.fontFamily == 'Comic Sans MS' %}selected{% endif %} style="font-family: 'Comic Sans MS', serif" name="Comic Sans MS">Comic Sans MS</option>
+        </select>
+        </div>
+
+        <div>
+            <div>
+                <label for="enableSortTable">Перетаскивание строк</label>
+                <input name="radioSettings" id="enableSortTable" type="radio" value="sort" autofocus
+                        {% if settings.enableSortTable %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="enableOpenCloseGroups">Открытие/закрытие групп</label>
+                <input name="radioSettings" id="enableOpenCloseGroups" type="radio" value="group"
+                        {% if settings.enableOpenCloseGroups %} checked {% endif %}>
+            </div>
+        </div>
+
+        <div style="display: inline-block">
+            <div>
+                <label for="showCalendar">Календарь</label>
+                <input name="showCalendar" id="showCalendar" type="checkbox"
+                        {% if settings.showCalendar %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showCreateActivityGroup">Создание групп</label>
+                <input name="showCreateActivityGroup" id="showCreateActivityGroup" type="checkbox"
+                        {% if settings.showCreateActivityGroup %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showCreateActivity">Создание активностей</label>
+                <input name="showCreateActivity" id="showCreateActivity" type="checkbox"
+                        {% if settings.showCreateActivity %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showDeleteActivity">Удаление активностей</label>
+                <input name="showDeleteActivity" id="showDeleteActivity" type="checkbox"
+                        {% if settings.showDeleteActivity %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showDeleteAllActivities">Удаление всех активностей</label>
+                <input name="showDeleteAllActivities" id="showDeleteAllActivities" type="checkbox"
+                        {% if settings.showDeleteAllActivities %} checked {% endif %}>
+            </div>
+        </div>
+
+        <div style="display: inline-block">
+            <div>
+                <label for="onSounds">Звуки</label>
+                <input name="onSounds" id="onSounds" type="checkbox"
+                        {% if settings.onSounds %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showTabs">Вкладки</label>
+                <input name="showTabs" id="showTabs" type="checkbox"
+                        {% if settings.showTabs %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showOpenAllGroups">Открытие/закрытие групп</label>
+                <input name="showOpenAllGroups" id="showOpenAllGroups" type="checkbox"
+                        {% if settings.showOpenAllGroups %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showActivityDayLight">Выделение активности и дня</label>
+                <input name="showActivityDayLight" id="showActivityDayLight" type="checkbox"
+                        {% if settings.showActivityDayLight %} checked {% endif %}>
+            </div>
+            <div>
+                <label for="showRowColumnLight">Выделение строки и столбца</label>
+                <input name="showRowColumnLight" id="showRowColumnLight" type="checkbox"
+                        {% if settings.showRowColumnLight %} checked {% endif %}>
+            </div>
+        </div>
+
+        <div>
+            <label for="selectFade">Пропадание при выполнении привычки</label>
+            <select name="selectFade" id="selectFade">
+                <option {% if settings.vanishing == 'off' %}selected{% endif %} value="off">Выключено</option>
+                <option {% if settings.vanishing == 'sharp' %}selected{% endif %} value="sharp">Резко</option>
+                <option {% if settings.vanishing == 'smooth' %}selected{% endif %} value="smooth">Плавно</option>
+            </select>
+        </div>
+
+        <p></p>
+        <hr>
+        <input id="data" name="data">
+    </form>
+    <button class="button-6" role="button" onclick="btnSaveSettings();"
+            style="background-color:#dfffdf;">Сохранить</button>
+    <form id="closeDialog" method="dialog" style="margin-right: 35px;">
+        <button class="button-6" role="button" style="background-color:#ffdfdf;">Закрыть</button>
+    </form>
+
+    <button onclick="location.href='{% url 'user_logout' %}';" class="button-6" style="width: auto; float: right">Выйти</button>
+<div style="float: right; margin-right: 10px">
+    {% if not request.user.is_superuser %}
+        {{ request.user.username }}
+    {% else %}
+        staff
+    {% endif %}
+</div>
+</dialog>  <!-- Диалоговое окно настроек сайта -->
+
+<div id="divButtons">
+<button id="buttonSettings" type="button" title="Настройки"
+        onclick="window['some-modal-id'].showModal();" aria-controls="some-modal-id">
+    <img width="16" height="16" src="{% static 'settings.png' %}"></button>  <!-- Кнопка настроек -->
+
+{#{% if mobile_version %}#}
+{#<button id="buttonSettings" type="button" style="margin-right: 10px;" title="Компьютерная версия"#}
+{#        onclick="location.href = '{% url 'by_date' date %}';">#}
+{#    <img width="16" height="16" src="{% static 'pc.png' %}"></button>  <!-- Компьютерная версия -->#}
+{#{% else %}#}
+{#<button id="buttonSettings" type="button" style="margin-right: 10px;" title="Мобильная версия"#}
+{#        onclick="location.href = '{% url 'mobile_by_date' date %}';">#}
+{#    <img width="16" height="16" src="{% static 'phone.png' %}"></button>  <!-- Мобильная версия -->#}
+{#{% endif %}#}
+
+<button id="screenShot" type="button" style="margin-right: 10px;" title="Сделать скриншот">
+    <img width="16" height="16" src="{% static 'photocam.png' %}"></button>  <!-- Кнопка скриншота -->
+<button id="hideActivities" type="button" style="margin-right: 10px;" title="Скрыть для фото">
+    <img width="16" height="16" src="{% static 'eye.png' %}"></button>  <!-- Скрыть активности -->
+<button id="hideCompleteActivities" type="button" style="margin-right: 10px;" title="Показать выполненные">
+    <img width="16" height="16" src="{% static 'eye.png' %}"></button>  <!-- Показать выполненные активности -->
+<button id="openGuide" type="button" onclick="window['dialogGuide'].showModal();" aria-controls="dialogGuide"
+        style="margin-right: 10px;" title="Справка">
+    <img width="16" height="16" src="{% static 'guide.png' %}"></button>  <!-- Справка -->
+</div>
+
+<dialog id="dialog" class="modalActivity">
+    <div class="modal__header">
+        <h3 class="dialog__title elementActivitySettings"></h3>
+        <img onclick="$('#closeSettingsActivity').click();" src="{% static 'cansel.svg' %}" width="25" height="25" alt="" style="float:right;">
+    </div>
+    <hr color="#c7c7c7" style="margin: 0;">
+    <form id="formActivitySettings" action="{% url 'by_date' date %}" method="post">
+        {% csrf_token %}
+        <input class="elementActivitySettings" type="hidden" name="activityPk"/>
+        <div>
+            <label id="activityNameLabel" for="activityName">Название группы:</label>
+            <div style="margin-bottom: 7px;"></div>
+            <input class="elementActivitySettings inputSettings" name="activityName" id="activityName" type="text">
+        </div>
+        <div class="hideOn">
+            <label id="hideOnLabel" for="hideOn">Добавить группу в скрытые</label>
+            <input name="hideOn" id="hideOn" type="checkbox" class="elementActivitySettings">
+        </div>
+        <hr id="upHr" color="#ffffff" style="margin: 20px;">
+        <div style="display: flex; justify-content: space-between">
+            <label for="colorBackgroundForm">Цвет заливки:</label>
+            <div style="margin-bottom: 7px;"></div>
+            <input style="margin-right: 20px;" id="colorBackgroundForm" name="backgroundColor" class="colorBackgroundForm elementActivitySettings" type="color">
+            <input id="colorBackgroundFormText" class="inputSettingsColor" maxlength="7" type="text">
+        </div>
+        <div style="display: flex; justify-content: space-between">
+            <label for="colorTextForm">Цвет текста:</label>
+            <div style="margin-bottom: 7px;"></div>
+            <input style="margin-right: 20px;" id="colorTextForm" name="color" class="colorTextForm elementActivitySettings" type="color">
+            <input id="colorTextFormText" class="inputSettingsColor" maxlength="7" type="text">
+        </div>
+        <div class="repaintActivities">
+            <label for="choiceColor">Перекрасить:</label>
+            <div style="margin-bottom: 7px;"></div>
+            <select id="choiceColor" name="saveWithColor" class="selectColor selectPicker">
+                <option value="false">Только цвет группы</option>
+                <option value="true">Цвет группы и цвет её активностей</option>
+            </select>
+        </div>
+        <hr id="downHr" color="#ffffff" style="margin: 20px;">
+        <div class="beginDay">
+            <label for="beginDay">День начала:</label>
+            <input name="beginDay" id="beginDay" type="number" min="1" max="{{ days }}" class="elementActivitySettings inputSettingsColor">
+        </div>
+        <div class="endDay">
+            <label for="endDay">День конца:</label>
+            <input name="endDay" id="endDay" type="number" min="1" max="{{ days }}" class="elementActivitySettings inputSettingsColor">
+        </div>
+        <div class="addActivityToGroup">Привязать активности к группе:</div>
+        <div class="grid-container">
+            {% for activity in range_activities %}
+                {% if not activity.isGroup %}
+                    <div class="activityCell marquee"><span class="spanActivityName">{{ activity.name }}</span>
+                        <label for="activityToGroup{{ activity.pk }}"></label>
+                        <input id="activityToGroup{{ activity.pk }}" class="elementActivitySettings" style="display: none" type="checkbox" name="{{ activity.pk }}">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <input type="hidden" id="inputCells" name="onOffCells">
+        <div class="activateDayOfActivity">Выбрать дни активности:</div>
+        <div class="onOffWeekdays">
+            {% for day in weekdays.keys %}
+                <p class="calendarWeek" id="weekday{{ forloop.counter }}" data-day="{{ day }}">{{ day }}</p>
+            {% endfor %}
+        </div>
+        <div class="onOffDaysDiv">
+            {% for week in calendar %}
+                <div style="display: flex">
+                    {% for day in week %}
+                        {% if day.month == month %}
+                            <p id="day{{ day.day }}" class="calendarDay thisDay">{{ day.day }}</p>
+                        {% else %}
+                            <p class="calendarDay">{{ day.day }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </form>
+    <hr color="#ffffff" style="margin: 0;">
+    <div style="padding: 15px">
+    <button class="button-save" onclick="submitActivitySettings();" role="button">Сохранить изменения</button>
+    </div>
+    <button class="button-6" onclick="submitActivitySettings('default');" role="button" style="background-color:#dfffdf;display:none;">Сохранить</button>
+    <button id="saveWithColor" onclick="submitActivitySettings('saveWithColor');" class="button-6" role="button" style="background-color:#fffcdf; width: auto; display:none;">Сохранить с переносом цвета</button>
+    <form style="display: none" method="dialog" id="closeDialog">
+        <button id="closeSettingsActivity" class="button-6" role="button" style="background-color:#ffdfdf;">Закрыть</button>
+    </form>
+</dialog>  <!-- Диалоговое окно настроек группы/активности -->
+
+<dialog id="dialogHead" class="modalColors">
+    <div class="modal__header">
+    <h3 class="dialog__title dialogHeadSettings">Глобальные настройки цвета</h3>
+    </div>
+    <hr>
+    <form id="formColorSettings" action="{% url 'global_colors' date %}" method="post">
+        {% csrf_token %}
+        <div>
+            <label for="tableHeadColor*changeParagraph">Цвет фона заголовка</label>
+            <input name="tableHeadColor" id="tableHeadColor*changeParagraph" type="color"
+                   value="{{ settings.tableHeadColor }}">
+        </div>
+        <div>
+            <label for="tableHeadColorWeekend">Цвет фона выходных</label>
+            <input name="tableHeadColorWeekend" id="tableHeadColorWeekend" type="color"
+                   value="{{ settings.tableHeadColorWeekend }}">
+        </div>
+        <div>
+            <label for="tableHeadTextColor*changeParagraph">Цвет текста заголовка</label>
+            <input name="tableHeadTextColor" id="tableHeadTextColor*changeParagraph"
+                   type="color" value="{{ settings.tableHeadTextColor }}">
+        </div>
+        <div>
+            <label for="backgroundColor">Цвет заднего фона сайта</label>
+            <input name="backgroundColor" id="backgroundColor" type="color"
+                   value="{{ settings.backgroundColor }}">
+        </div>
+        <div>
+            <label for="rowColumnLight">Цвет выделения строки и столбца</label>
+            <input name="rowColumnLight" id="rowColumnLight" type="color"
+                   value="{{ settings.rowColumnLight }}">
+        </div>
+
+    </form>
+    <hr>
+    <div id="buttonsFooter">
+    <button class="button-6" onclick="document.querySelector('form[id=formColorSettings]').submit();"
+            role="button" style="background-color:#dfffdf;">Сохранить</button>
+    <form method="dialog" id="closeDialog">
+        <button class="button-6" role="button" style="background-color:#ffdfdf;">Закрыть</button>
+    </form>
+        </div>
+</dialog>  <!-- Диалоговое окно глобальных настроек цвета -->
+
+<dialog id="dialogCell">
+    <h3 class="dialog__title dialogHeadSettings">Настройка клетки</h3>
+    <hr>
+    <form id="formCellCommentSettings" action="{% url 'by_date' date %}" method="post">
+        {% csrf_token %}
+        <div>
+            <label for="symbolsOnCell">Надпись в клетке</label>
+            <input id="symbolsOnCell" name="symbols" type="text">
+        </div>
+        <div>
+            <label for="commentOnCell">Комментарий в клетке</label>
+            <textarea id="commentOnCell" name="comment"></textarea>
+        </div>
+        <input id="cellNum" type="hidden" name="cell">
+    </form>
+    <hr>
+    <button class="button-6" onclick="document.querySelector('form[id=formCellCommentSettings]').submit();"
+            role="button" style="background-color:#dfffdf;">Сохранить</button>
+    <form method="dialog" id="closeDialog">
+        <button class="button-6" role="button" style="background-color:#ffdfdf;">Закрыть</button>
+    </form>
+</dialog>  <!-- Диалоговое окно текста клетки -->
+
+<style>
+    .tabs {
+        font-size: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tabs > input[type="radio"] {
+        display: none;
+    }
+
+    .tabs > div {
+        /* скрыть контент по умолчанию */
+        display: none;
+        border: 1px solid #e0e0e0;
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+
+    /* отобразить контент, связанный с выбранной радиокнопкой (input type="radio") */
+    #tab-btn-1:checked ~ #content-1,
+    #tab-btn-2:checked ~ #content-2,
+    #tab-btn-3:checked ~ #content-3,
+    #tab-btn-4:checked ~ #content-4 {
+        display: block;
+    }
+
+    .tabs > label {
+        display: inline-block;
+        text-align: center;
+        vertical-align: middle;
+        user-select: none;
+        background-color: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        padding: 2px 8px;
+        font-size: 16px;
+        line-height: 1.5;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+        cursor: pointer;
+        position: relative;
+        top: 1px;
+    }
+
+    .tabs > label:not(:first-of-type) {
+        border-left: none;
+    }
+
+    .tabs > input[type="radio"]:checked + label {
+        background-color: #fff;
+        border-bottom: 1px solid #fff;
+    }
+</style>
+
+<dialog id="dialogGuide" class="modalColors">
+    <div class="modal__header">
+    <h3 class="dialog__title dialogHeadSettings">Гайд</h3>
+    <hr>
+    </div>
+<div class="tabs">
+    <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
+    <label for="tab-btn-1">Настройки</label>
+    <input type="radio" name="tab-btn" id="tab-btn-2" value="">
+    <label for="tab-btn-2">Глобальные настройки цвета</label>
+    <input type="radio" name="tab-btn" id="tab-btn-3" value="">
+    <label for="tab-btn-3">Настройки активности/группы</label>
+    <input type="radio" name="tab-btn" id="tab-btn-4" value="">
+    <label for="tab-btn-4">Настройки клетки</label>
+
+    <div id="content-1">
+      Содержимое 1...
+    </div>
+    <div id="content-2">
+      Содержимое 2...
+    </div>
+    <div id="content-3">
+      Содержимое 3...
+    </div>
+    <div id="content-4">
+      <div><img width="750" src="{% static 'guide2.jpg' %}" alt=""></div>
+    </div>
+  </div>
+    <hr>
+    <form method="dialog" id="closeDialog">
+        <button class="button-6" role="button" style="background-color:#ffdfdf;">Закрыть</button>
+    </form>
+</dialog>  <!-- Диалоговое окно глобальных настроек цвета -->

@@ -1,0 +1,84 @@
+{% load tags %}
+{% get_date_y_m as by_date %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .skew-menu {
+        text-align: center;
+        top: 0;
+        font-family: "Montserrat", sans-serif;
+    }
+
+    .skew-menu * {
+        font-family: "Montserrat", sans-serif;
+    }
+
+    .skew-menu ul {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        transform: skew(-25deg);
+    }
+
+    .skew-menu ul li {
+        background: #fff;
+        float: left;
+        border-right: 1px solid #eee;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        text-transform: uppercase;
+        color: #555;
+        font-weight: bolder;
+        font-size: small;
+        transition: all 0.3s linear;
+    }
+
+    .skew-menu ul li:first-child {
+        border-radius: 7px 0 0 7px;
+    }
+
+    .skew-menu ul li:last-child {
+        border-right: none;
+        border-radius: 0 7px 7px 0;
+    }
+
+    .skew-menu ul li:hover {
+        background: #eee;
+        color: {{ settings.backgroundColor }};
+    }
+
+    .skew-menu ul li a {
+        display: block;
+        padding: 5px 10px;
+        color: inherit;
+        text-decoration: none;
+        transform: skew(25deg);
+    }
+
+    .active-navilinki {
+        background-color: #e2d4ff !important;
+    }
+</style>
+<nav class="skew-menu">
+    <ul>
+        <li><a href="{% url 'budget:index' %}" class="navilinki">Главная</a></li>
+        <li><a href="{% url 'budget:transaction-create' %}?type=income" class="navilinki">Доход</a></li>
+        <li><a href="{% url 'budget:transaction-create' %}?type=expense" class="navilinki">Затрата</a></li>
+        <li><a href="{% url 'budget:history-finance' %}" class="navilinki">История</a></li>
+        <li><a href="{% url 'budget:prediction' %}" class="navilinki">Прогнозирование</a></li>
+        <li><a href="{% url 'budget:planning' %}" class="navilinki">Запланированное</a></li>
+        <li><a href="{% url 'budget:account_list' %}" class="navilinki">Накопления</a></li>
+    </ul>
+</nav>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script>
+    for (let elem of document.querySelectorAll('.navilinki')) {
+        {#console.log(elem.href, location.href)#}
+        if (elem.href === location.href) {
+            $(elem.parentElement).toggleClass('active-navilinki')
+        }
+    }
+</script>

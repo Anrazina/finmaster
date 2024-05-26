@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список транзакций</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+    <link rel="stylesheet" href="{% static 'budget/css/transaction_list.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+
+{% include 'budget/mic.html' %}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Список {% if 'permanent' in request.path %}постоянных{% endif %} транзакций</h2>
+    <div style="display:flex;justify-content: space-evenly">
+        {% if not 'permanent' in request.path %}
+            <a href="{% url 'budget:permanent-transaction-list' %}" class="add-btn"><i style="color: #0f5132"
+                                                                                       class="fa-solid fa-clock-rotate-left"></i></a>
+        {% else %}
+            <a href="{% url 'budget:transaction-list' %}" class="add-btn"><i style="color: #0f5132"
+                                                                             class="fa-solid fa-bars"></i></a>
+        {% endif %}
+        <a href="{% url 'budget:category-list' %}" class="add-btn"><i style="color: #0f5132"
+                                                                      class="fa-solid fa-list"></i></a>
+    </div>
+    <div class="row">
+    {% regroup transactions by date as date_groups %}
+    {% for date_group in date_groups %}
+        <div class="col-12">
+            <h3>{{ date_group.grouper }}</h3>
+            <div class="row" style="margin-bottom: 20px">
+                {% for transaction in date_group.list %}
+                    <div class="transaction-card col-sm-12 col-md-6 col-lg-3" {% if transaction.category.type == 'I' %}style="background-color: #ebffe0" {% else %} style="background-color: #ffe9e9"{% endif %}>
+                        <div class="details">
+                            <div class="category category-text" style="background-color: {{ transaction.category.color }}">
+                                {{ transaction.category }}
+                            </div>
+                            {% if not 'permanent' in request.path %}
+                                <div class="date category">{{ transaction.date }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="line"></div>
+                        <div class="details">
+                            <span class="amount"><span class="currency-symbol">₽</span> {% if transaction.category.type == 'I' %}
+                                {{ transaction.amount }}{% else %}-{{ transaction.amount }}{% endif %}
+                            </span>
+                            <span class="description">{{ transaction.description }}</span>
+                        </div>
+                        <div class="actions">
+                            <i class="fa fa-{{ transaction.category.icon }}" style="float: left"></i>
+                            <a href="{% url 'budget:transaction-edit' transaction.id %}{% if transaction.category.type == 'I' %}?type=income{% else %}?type=expense{% endif %}" class="card-link"><i style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-pen-to-square"></i></a>
+                            <a href="{% url 'budget:transaction-delete' transaction.id %}" class="card-link"><i style="color: #ff8a8a" class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center">Транзакции не найдены.</p>
+    {% endfor %}
+</div>
+
+</div>
+
+<!-- Подключение Bootstrap JS и зависимости -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://kit.fontawesome.com/03c2a52bd5.js" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function getContrastYIQ(hexcolor) {
+            hexcolor = hexcolor.replace("#", "");
+            let r = parseInt(hexcolor.substr(0, 2), 16);
+            let g = parseInt(hexcolor.substr(2, 2), 16);
+            let b = parseInt(hexcolor.substr(4, 2), 16);
+            let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? 'black' : 'white';
+        }
+
+        const categoryElements = document.querySelectorAll('.category-text');
+        categoryElements.forEach(function (el) {
+            const bgColor = el.style.backgroundColor;
+            const hexColor = rgbToHex(bgColor);
+            el.style.color = getContrastYIQ(hexColor);
+        });
+
+        function rgbToHex(rgb) {
+            const result = rgb.match(/\d+/g);
+            return "#" + result.map(function (x) {
+                return parseInt(x).toString(16).padStart(2, '0');
+            }).join('');
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    font-family: "Montserrat", sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card-container {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 20px;
+}
+
+.bank-card {
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bank-card h5 {
+    font-size: 1.2em;
+    color: #333;
+}
+
+.bank-card-details {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+.add-btn {
+    display: block;
+    width: max-content;
+    padding: 0.375rem 0.75rem;
+    margin: 0 0 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 0.25rem;
+    border: 2px solid #0f5132;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #dbffe6;
+}
+
+.progress-bar {
+    position: relative;
+    height: 20px;
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar span {
+    display: block;
+    height: 100%;
+    background-color: #78d356;
+    width: 0;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}

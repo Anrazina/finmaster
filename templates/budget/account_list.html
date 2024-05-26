@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'budget/bootstrap.min.css' %}">
+    <title>Список Счетов</title>
+    <link rel="stylesheet" href="{% static 'budget/css/account_list.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+{% include 'budget/mic.html' %}
+<div class="container">
+    <h1 class="my-4 text-center">Накопления</h1>
+    <div style="display:flex;justify-content: space-evenly">
+        <a href="{% url 'budget:account_new' %}?type=account" class="add-btn"><i style="color: #0f5132"
+                                                                                 class="fa-solid fa-plus"> счёт</i></a>
+        <a href="{% url 'budget:account_new' %}?type=goal" class="add-btn"><i style="color: #0f5132"
+                                                                              class="fa-solid fa-plus"> цель</i></a>
+        <a href="{% url 'budget:transfer_funds' %}" class="add-btn">Оформить перевод</a>
+    </div>
+    <div class="card-container">
+        {% for account in accounts %}
+            <div class="bank-card">
+                <div>
+                    <h5>{{ account.name }}</h5>
+                    <hr>
+                    {% if account.account_type_id == 2 %}
+                        <p class="bank-card-details">Тип счета: {{ account.account_type.name }}</p>
+                        <p class="bank-card-details">Валюта: {{ account.currency.name }}</p>
+                        <p class="bank-card-details">Баланс: {{ account.balance }}</p>
+                    {% else %}
+                        <p class="bank-card-details">Тип счета: {{ account.account_type.name }}</p>
+                        <p class="bank-card-details">Валюта: {{ account.currency.name }}</p>
+                        <p class="bank-card-details">
+                            Накоплено: <span>{{ account.initial_balance }}/{{ account.balance }}</span></p>
+                        <p class="bank-card-details">Дата: {{ account.closing_date }}</p>
+                        <div class="progress-bar" data-initial="{{ account.initial_balance }}"
+                             data-balance="{{ account.balance }}">
+                            <span></span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div style="display:flex;justify-content: space-evenly">
+                    <a href="{% url 'budget:account_detail' pk=account.pk %}" class="mr-3 mt-3"><i
+                            style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-eye"></i></a>
+                    <a href="{% url 'budget:account_edit' pk=account.pk %}" class="mr-3 mt-3"><i
+                            style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-pen-to-square"></i></a>
+                    <a href="{% url 'budget:account_delete' pk=account.pk %}" class="mt-3"><i
+                            style="color: #ff8a8a" class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+        {% empty %}
+            <p>Накопления отсутствуют</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(function (progressBar) {
+            var initialBalance = parseFloat(progressBar.getAttribute('data-initial'));
+            var balance = parseFloat(progressBar.getAttribute('data-balance'));
+            var progress = (initialBalance / balance) * 100;
+            progressBar.querySelector('span').style.width = progress + '%';
+        });
+    });
+</script>
+<script src="{% static 'budget/03c2a52bd5.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список транзакций</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+    <link rel="stylesheet" href="{% static 'budget/css/category_list.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/background.css' %}">
+</head>
+<body>
+{% include 'navibar_budget.html' %}
+{% include 'budget/mic.html' %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Список категорий</h2>
+    <a href="{% url 'budget:category-add' %}" class="add-btn" style="color: #0f5132; background-color: #aeffd7;"><i
+            class="fa-solid fa-plus"></i></a>
+    <div class="row justify-content-center">
+        {% for category in category_list %}
+            <div class="transaction-card col-sm-12 col-md-6 col-lg-4 mb-3" {% if category.type == 'I' %}style="background-color: #ebffe0" {% else %} style="background-color: #ffe9e9"{% endif %}>
+                <div class="card-body">
+                    <h5 class="card-title" style="background-color: {{ category.color }}">{{ category.name }}<i class="fa fa-{{ category.icon }}" style="float: right"></i></h5>
+                    <p class="category">{{ category.get_type_display }}</p>
+                    <div class="actions">
+                        <a href="{% url 'budget:category-update' category.id %}" class="card-link"><i
+                                style="color: #8ab9ff; margin-right: 7px" class="fa-solid fa-pen-to-square"></i></a>
+                        <a href="{% url 'budget:category-delete' category.id %}" class="card-link"><i
+                                style="color: #ff8a8a" class="fa-solid fa-trash"></i></a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">Категории не найдены.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Подключение Bootstrap JS и зависимости -->
+<script src="{% static 'budget/03c2a52bd5.js' %}"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
